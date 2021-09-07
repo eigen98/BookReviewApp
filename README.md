@@ -329,6 +329,44 @@ delete버튼을 활성화하기 위하여 HistoryAdapter() 생성자 부분에 �
 initHistoryRecyclerView() 함수 정의
 
 ### 도서 상세 페이지 - 도서 상세 보여주기
+액티비티 추가 후 
+
+
+값을 MainActivity로 부터 가져와야함. (Intent를 통해서 가져옴)
+리사이클러뷰에 있는 데이터를 가져와야하기에 클릭리스너를 붙여주어야함.
+어댑터에 붙여줌. -> initBookReycyclerView()안에 BookAdapter안에 클릭리스너를 인자로 넣어준다.
+
+	class BookAdapter(private val itemClickedListener : (Book) -> Unit) :
+	
+	fun bind(bookModel: Book){ 
+            
+            binding.root.setOnClickListener{ //루트를 클릭하게 된다면 함수 호출
+                itemClickedListener(bookModel)// 이함수는 MainActivity에서 initRecyclerView안에서 구현
+            }
+	    
+MainActivity에서 initRecyclerView안에서 구현
+
+	fun initBookRecyclerView(){
+		adapter = BookAdapter(itemClickedListener = {
+		    val intent = Intent(this, DetailActivity::class.java)
+		    //클래스를 직렬화 시켜서 클래스 자체를 넘기는 방법
+		    intent.putExtra("bookModel", it)
+		    startActivity(intent)})
+북 클래스를 직렬화 하기 위해서는
+	
+	id 'kotlin-parcelize' 
+추가 후에 Book 클래스에 어노테이션추가 후 직렬화가능 선언
+
+	@Parcelize
+	data class Book(
+	    @SerializedName("itemId") val id : Long,
+	    @SerializedName("title") val title : String,
+	    @SerializedName("description") val description : String,
+	    @SerializedName("coverSmallUrl") val coverSmallUrl : String
+	) : Parcelable //직렬화가 가능하게 선언
+
+액티비티 추가 후 manifest 추가 주의
+
 ### 어떤 것을 추가로 개발할 수 있을까?
 ### 아웃트로   
 
