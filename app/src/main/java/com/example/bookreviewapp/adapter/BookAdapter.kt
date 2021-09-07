@@ -14,7 +14,7 @@ class BookAdapter : ListAdapter<Book,BookAdapter.BookItemViewHolder>(diffUtil) {
 
     inner class BookItemViewHolder(private val binding: ItemBookBinding) : RecyclerView.ViewHolder(binding.root){// 미리 그려진 뷰
 
-        fun bind(bookModel: Book){
+        fun bind(bookModel: Book){ //북이라는 이름으로 북클래스를 가져옴
             binding.titleTextView.text = bookModel.title
             binding.descriptionTextView.text = bookModel.description
 

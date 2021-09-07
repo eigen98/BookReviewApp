@@ -11,14 +11,14 @@ import com.example.bookreviewapp.databinding.ItemHistoryBinding
 import com.example.bookreviewapp.model.Book
 import com.example.bookreviewapp.model.History
 
-class HistoryAdapter(val historyDeleteClickedListenr : (String)->Unit) : ListAdapter<History, HistoryAdapter.HistoryItemViewHolder>(diffUtil) {
+class HistoryAdapter(val historyDeleteClickedListener : (String)->Unit) : ListAdapter<History, HistoryAdapter.HistoryItemViewHolder>(diffUtil) {
 
     inner class HistoryItemViewHolder(private val binding: ItemHistoryBinding) : RecyclerView.ViewHolder(binding.root){// 미리 그려진 뷰
 
         fun bind(historyModel: History){
             binding.historyKeywordTextView.text = historyModel.keyword
             binding.historyKeywordDeleteButton.setOnClickListener {
-                historyDeleteClickedListenr(historyModel.keyword.orEmpty())
+                historyDeleteClickedListener(historyModel.keyword.orEmpty())
             }
         }
     }

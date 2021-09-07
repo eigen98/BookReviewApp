@@ -142,7 +142,7 @@ class MainActivity : AppCompatActivity() {
         binding.searchEditText.setOnKeyListener{ v, keyCode, event ->//키가 눌렸을 때 이벤트
             if(keyCode==KeyEvent.KEYCODE_ENTER && event.action == MotionEvent.ACTION_DOWN) {//엔터가 눌렸을 때
                 search(binding.searchEditText.text.toString())
-                return@setOnKeyListener true //true는 이벤트를 처리를 했음을 알림
+                return@setOnKeyListener true //true는 이벤트를 처리를 했음을 알림 //반환값은 true
             }
             return@setOnKeyListener false
         }
