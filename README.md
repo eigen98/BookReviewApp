@@ -61,54 +61,54 @@ Local DB 를 이용하여 개인 리뷰를 저장할 수 있음.
 참고)DTO란 (Data Transfer Object) 계층 간 데이터 교환역할을 함. Entity를 Controller같은 클라이어단과 직접   
 마주하는 계층에 직접 전달하는 대신 DTO를 사용해 데이터를 교환함.   
 
-  data class BestSellerDto( //
-      @SerializedName("title") val title : String,
-      @SerializedName("item") val books : List<Book>,
-  )
+	  data class BestSellerDto( //
+	      @SerializedName("title") val title : String,
+	      @SerializedName("item") val books : List<Book>,
+	  )
 
-  data class SearchBookDto(
-      @SerializedName("title") val title : String,
-      @SerializedName("item") val books : List<Book>
-  )
+	  data class SearchBookDto(
+	      @SerializedName("title") val title : String,
+	      @SerializedName("item") val books : List<Book>
+	  )
 
 콜되는 responseAPI 에 모델DTO 추가
 
 retrofit인터페이스를 작성하였으니 이제 retrofit 구현체를 구현해야한다.
 onCreate쪽에 구현   
-  val retrofit = Retrofit.Builder()
-                  .baseUrl("https://book.interpark.com")
-                  .addConverterFactory(GsonConverterFactory.create()) //Gson으로 변환해주는 converter
-                  .build()  //구현체 생성
+	  val retrofit = Retrofit.Builder()
+			  .baseUrl("https://book.interpark.com")
+			  .addConverterFactory(GsonConverterFactory.create()) //Gson으로 변환해주는 converter
+			  .build()  //구현체 생성
 
-  val bookService = retrofit.create(BookService::class.java) //구현체//retrofit 인터페이스의 구현체 생성
-  bookService.getBestSellerBooks(getString(R.string.interparkAPIKey)) //구현한 북서비스를 이용하여 메소드 호출. 인자로는 API키를 받음
-                  .enqueue(object : Callback<BestSellerDto>{  //큐에 넣어줌 //반환값은 콜백
-                      override fun onResponse(call: Call<BestSellerDto>, response: Response<BestSellerDto>) {  // 콜백에 구현이 필요한 부분 구현 //API요청 성공시 호출
-                          //성공처리
-                          if(response.isSuccessful.not()){
-                              Log.d(TAG, "NOT! SUCCESS")
-                              return
-                          }
-                          response.body()?.let{ //reponse에서 바디를 꺼냄//바디는 bestsellerdto데이터가 들어있음.// 바디가 없을 수도 있기에 ? 
-                              Log.d(TAG,it.toString())
+	  val bookService = retrofit.create(BookService::class.java) //구현체//retrofit 인터페이스의 구현체 생성
+	  bookService.getBestSellerBooks(getString(R.string.interparkAPIKey)) //구현한 북서비스를 이용하여 메소드 호출. 인자로는 API키를 받음
+			  .enqueue(object : Callback<BestSellerDto>{  //큐에 넣어줌 //반환값은 콜백
+			      override fun onResponse(call: Call<BestSellerDto>, response: Response<BestSellerDto>) {  // 콜백에 구현이 필요한 부분 구현 //API요청 성공시 호출
+				  //성공처리
+				  if(response.isSuccessful.not()){
+				      Log.d(TAG, "NOT! SUCCESS")
+				      return
+				  }
+				  response.body()?.let{ //reponse에서 바디를 꺼냄//바디는 bestsellerdto데이터가 들어있음.// 바디가 없을 수도 있기에 ? 
+				      Log.d(TAG,it.toString())
 
-                              it.books.forEach{book ->
-                                  Log.d(TAG, book.toString())
-                              }
-                              adapter.submitList(it.books) //반응이 오면 리스트를 대체해줌
-                          }
+				      it.books.forEach{book ->
+					  Log.d(TAG, book.toString())
+				      }
+				      adapter.submitList(it.books) //반응이 오면 리스트를 대체해줌
+				  }
 
 
-                      }
+			      }
 
-                      override fun onFailure(call: Call<BestSellerDto>, t: Throwable) { //API요청 실패시 호출
+			      override fun onFailure(call: Call<BestSellerDto>, t: Throwable) { //API요청 실패시 호출
 
-                          //실패처리
-                          Log.d(TAG, t.toString())
-                      }
+				  //실패처리
+				  Log.d(TAG, t.toString())
+			      }
 
-                  })
-                
+			  })
+
 하지만 앱이 죽는다 Permission denied 인터넷 권한을 불러와서 해결한다. manifest에서 추가해준다.
 이번엔 또 실패한다. 그 이휴는not permitted by network security policy ->이것은 baseUrl이 http형식이기때문에 평문으로 전송하는 옛날 프로토콜이기에 안드로이드에서 막힌 것이다.
 서버에 https로 연결하는 방법이 있고 두번 째 방법은 http연결을 허용하는 방법이다. 우선 baseUrl을 https로 바꿔서 해결하였다.
@@ -218,8 +218,116 @@ onCreate쪽에 구현
 
 
 ### 도서 리스트 화면 - 도서 목록 보여주기
+그려줄 아이템뷰를 꾸며줌-> 그 후 바인드 함수에서 값 바인드해줌
+이미지 리소스 설정 url형식으로 되어있음(coverSmallUrl)은 다운받을 필요가 있다.
+glidle을 이용.
+**추가방법**
+	implementation 'com.github.bumptech.glide:glide:4.12.0'
+   	annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0' 
+**사용방법** (바인드 bind함수에 추가)
+	Glide//글라이드를 통해 이미지 로딩
+                  .with(binding.coverImageView) 	//컨텍스트를 인자로 넣어줌
+                  .load(bookModel.coverSmallUrl)
+                  .into(binding.coverImageView) //서버에서 url이미지를 가져와서 추가
+그러나 빌드를 하면 문제가 발생한다. 이미지로드가 되지않아서 로그를 보니 fail to laod ... 값이 http데이터 형식으로 내려온 상황이다.
+아까는 baseUrl을 https로 변경을 해주었지만 이것은 실제로 값이 http로 데이터가 내려왔다. 하여 어쩔 수 없이 안드로이드에서 http를 허용시키겠다.
+manifest의 application부분에서 usesCleartextTraffic을 true로 추가시켜주면 평문통신인 http를 허용시킨다. 그후 해결이 되었다.
+	
+	
+	
 ### 도서 검색 페이지 - 도서 검색하기
+
 ### 도서 검색 페이지 - 검색 기록 저장하기
+최근검색어를 DB에 저장하고 삭제하는 기능 추가
+
+Android Room사용 예정(계산기 만들면서 실습해봄)
+
+
+	**추가방법**
+	id 'kotlin-kapt'
+	
+	implementation 'androidx.room:room-runtime:2.2.6'
+   	 kapt 'androidx.room:room-compiler:2.2.6'
+	 
+**클래스 앱 데이터베이스를 만든다.AppDataBase -> 룸을 사용하기 위해서 @DataBase입력**	 
+
+	@Database(entities = [History::class], version = 1)
+	abstract class AppDatabase :RoomDatabase(){
+
+	    //DB는 Dao에서 꺼내옴
+	    abstract fun historyDao(): HistoryDao
+	}
+	
+**Entity를 만들어준다 History**
+
+	@Entity
+	data class History (//모델클래스는 data클래스
+
+	    @PrimaryKey val uid : Int?,
+	    @ColumnInfo(name = "keyword") val keyword : String?,
+
+
+	)
+**DAO를 만들어준다.**(인터페이스)
+(Data Access Object) 참고) DB를 사용해 데이터를 조화하거나 조작하는 기능을 전담
+자신이 필요한 interface를 DAO에게 던지고 DAO는 이 인터페이스를 구현한 객체를 반환
+
+	@Dao 
+	interface HistoryDao {
+	    @Query("SELECT * FROM history") //history테이블에서 모든 데이터를 가져옴
+	    fun getAll(): List<History>
+
+	    @Insert
+	    fun insertHistory(history: History)
+
+	    @Query("DELETE FROM history WHERE keyword == :keyword")
+	    fun delete(keyword : String)
+
+	}
+	
+MainActivity에서 전역변수로 DB를 구현
+
+	private lateinit var db : AppDatabase
+	db = Room.databaseBuilder(
+            applicationContext,		//applicationContext가 인자로 들어감
+            AppDatabase::class.java,	//데이터베이스 클래스가 인자로 들어감
+            "BookSearchDB"		//이름
+        ).build()			//db생성
+	
+search함수 호출 시 db저장할 것이므로 onResponse안에 saveSearchKeyword()함수로 저장
+
+	private fun saveSearchKeyword(keyword : String){
+		Thread {
+		    db.historyDao().insertHistory(History(null, keyword))
+		}.start()
+	}
+	
+리사이클러뷰로 히스토리뷰 추가
+그 후 히스토리 뷰는 숨겨졌다가 자유자재로 나와야하기에  function으로 정의
+
+	private fun showHistoryView(){
+		Thread{
+		    val keywords = db.historyDao().getAll().reversed() //최신순서대로 가져옴
+
+		    runOnUiThread(){//ui작업을 하기 위해서
+			binding.historyRecyclerView.isVisible = true
+			historyAdapter.submitList(keywords.orEmpty())	//히스토리 어댑터에 넣어줌.
+		    }
+		}
+		binding.historyRecyclerView.isVisible = true //나타남
+	    }
+	    private fun hideHistoryView(){
+		binding.historyRecyclerView.isVisible = false	//사라짐
+	    }
+	    
+히스토리 어댑터에 값을 넣어주기위하여 어댑터를 만들어준다.
+delete버튼을 활성화하기 위하여 HistoryAdapter() 생성자 부분에 인자 추가
+	class HistoryAdapter(**val historyDeleteClickedListenr : (String)->Unit)** : ListAdapter<History, HistoryAdapter.HistoryItemViewHolder>(diffUtil) {
+	**//String을 인자로 받는 데 return값은 없는함수를 타입으로 가지는 람다함수.**
+	
+	
+initHistoryRecyclerView() 함수 정의
+
 ### 도서 상세 페이지 - 도서 상세 보여주기
 ### 어떤 것을 추가로 개발할 수 있을까?
 ### 아웃트로   
