@@ -95,7 +95,7 @@ onCreate쪽에 구현
                               it.books.forEach{book ->
                                   Log.d(TAG, book.toString())
                               }
-                              adapter.submitList(it.books) //리스트를 대체해줌
+                              adapter.submitList(it.books) //반응이 오면 리스트를 대체해줌
                           }
 
 
