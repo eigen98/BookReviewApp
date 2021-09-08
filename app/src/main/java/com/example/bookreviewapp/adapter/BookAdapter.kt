@@ -10,13 +10,17 @@ import com.example.bookreviewapp.databinding.ItemBookBinding
 import com.example.bookreviewapp.model.Book
 
 
-class BookAdapter : ListAdapter<Book,BookAdapter.BookItemViewHolder>(diffUtil) {
+class BookAdapter(private val itemClickedListener : (Book) -> Unit) : ListAdapter<Book,BookAdapter.BookItemViewHolder>(diffUtil) {
 
     inner class BookItemViewHolder(private val binding: ItemBookBinding) : RecyclerView.ViewHolder(binding.root){// 미리 그려진 뷰
 
         fun bind(bookModel: Book){ //북이라는 이름으로 북클래스를 가져옴
             binding.titleTextView.text = bookModel.title
             binding.descriptionTextView.text = bookModel.description
+
+            binding.root.setOnClickListener{
+                itemClickedListener(bookModel)
+            }
 
             Glide//글라이드를 통해 이미지 로딩
                 .with(binding.coverImageView)

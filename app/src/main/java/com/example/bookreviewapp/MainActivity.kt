@@ -1,5 +1,6 @@
 package com.example.bookreviewapp
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -40,11 +41,7 @@ class MainActivity : AppCompatActivity() {
         initBookRecyclerView()
         initHistoryRecyclerView()
 
-        db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "BookSearchDB"
-        ).build()
+        db = getAppDatabase(this)
 
         val retrofit = Retrofit.Builder()
                 .baseUrl("https://book.interpark.com")
@@ -123,14 +120,19 @@ class MainActivity : AppCompatActivity() {
 
 
     fun initBookRecyclerView(){
-        adapter = BookAdapter()
+        adapter = BookAdapter(itemClickedListener = {
+            val intent = Intent(this, DetailActivity::class.java)
+            //클래스를 직렬화 시켜서 클래스 자체를 넘기는 방법
+            intent.putExtra("bookModel", it)
+            startActivity(intent)
+        })
 
         binding.bookRecyclerView.layoutManager = LinearLayoutManager(this) //레이아웃매니저
         binding.bookRecyclerView.adapter = adapter//어댑터 장착
     }
 
     private fun initHistoryRecyclerView(){
-        historyAdapter = HistoryAdapter (historyDeleteClickedListenr = {
+        historyAdapter = HistoryAdapter (historyDeleteClickedListener = {
             deleteSearchKeyword(it)
         })
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
