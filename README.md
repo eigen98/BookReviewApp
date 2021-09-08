@@ -9,6 +9,9 @@ Local DB 를 이용하여 검색 기록을 저장하고 삭제할 수 있음.
 
 Local DB 를 이용하여 개인 리뷰를 저장할 수 있음.   
 
+![KakaoTalk_20210908_192639661](https://user-images.githubusercontent.com/68258365/132493343-ed7d311c-c98a-4ef1-8c2f-df95fd94e8f8.jpg)
+
+
 
 ### 인터파크 도서 Open API 신청하기   
   포스트맨을 활용하여 데이터받아보기   
